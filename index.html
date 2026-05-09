@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Big Burger Disparo</title>
+  <style>
+    :root{--bg:#070707;--card:#111;--card2:#171717;--red:#e71919;--yellow:#ffc400;--text:#f8fafc;--muted:#a1a1aa;--border:#2a2a2a;--green:#22c55e}
+    *{box-sizing:border-box}
+    body{margin:0;background:radial-gradient(circle at top,#2a0606,#070707 42%);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+    header{position:sticky;top:0;z-index:10;background:rgba(0,0,0,.86);backdrop-filter:blur(10px);border-bottom:1px solid #7f1d1d;padding:16px 22px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+    .brand{display:flex;align-items:center;gap:12px}.logo{width:52px;height:52px;border-radius:14px;background:#111;border:1px solid #333;display:grid;place-items:center;font-size:24px}
+    .brand h1{font-size:24px;margin:0;letter-spacing:.5px}.brand h1 span{color:var(--red)}.brand small{display:block;color:var(--muted);letter-spacing:5px;font-size:10px;margin-top:2px}
+    .pill{background:#190909;border:1px solid #7f1d1d;color:#fecaca;border-radius:999px;padding:9px 13px;font-weight:700}
+    main{max-width:1240px;margin:0 auto;padding:24px;display:grid;grid-template-columns:360px 1fr;gap:18px}
+    .card{background:linear-gradient(180deg,#151515,#0d0d0d);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:0 14px 35px rgba(0,0,0,.35)}
+    h2{margin:0 0 14px;font-size:20px} h3{margin:18px 0 8px;font-size:15px;color:#fef08a}
+    label{display:block;margin:12px 0 7px;font-weight:700;color:#ddd;font-size:13px}
+    input,textarea,select{width:100%;border:1px solid #303030;background:#0b0b0b;color:#fff;border-radius:12px;padding:12px;font-size:14px;outline:none}
+    textarea{min-height:160px;resize:vertical;line-height:1.4}
+    input:focus,textarea:focus,select:focus{border-color:var(--red)}
+    button{border:0;border-radius:12px;padding:12px 14px;font-weight:900;cursor:pointer;color:#fff;background:#252525}
+    .btn-red{background:linear-gradient(180deg,#ef4444,#b91c1c)}.btn-yellow{background:linear-gradient(180deg,#facc15,#eab308);color:#111}.btn-green{background:linear-gradient(180deg,#22c55e,#15803d)}.btn-outline{background:#111;border:1px solid #444}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .stat{background:#0c0c0c;border:1px solid #2c2c2c;border-radius:14px;padding:14px}.stat b{font-size:22px;color:var(--red)}.stat span{display:block;color:var(--muted);font-size:12px;margin-top:5px}
+    .contacts{max-height:320px;overflow:auto;border:1px solid #2a2a2a;border-radius:14px}.contact{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:10px;border-bottom:1px solid #222}.contact:last-child{border-bottom:0}.contact small{display:block;color:var(--muted)}
+    .warn{background:#2b1704;border:1px solid #a16207;color:#fde68a;border-radius:14px;padding:12px;font-size:13px;line-height:1.4}
+    .log{height:260px;overflow:auto;background:#050505;border:1px solid #2a2a2a;border-radius:14px;padding:12px;font-family:Consolas,monospace;font-size:12px;white-space:pre-wrap;color:#ddd}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.tab{border:1px solid #333;background:#111}.tab.active{background:var(--red);border-color:var(--red)}
+    .hidden{display:none}.row{display:flex;gap:10px;flex-wrap:wrap}.right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .badge{border-radius:999px;padding:5px 8px;background:#052e16;color:#86efac;border:1px solid #166534;font-size:12px;font-weight:800}
+    @media(max-width:900px){main{grid-template-columns:1fr;padding:14px}header{align-items:flex-start;flex-direction:column}.brand h1{font-size:20px}.grid3,.grid2{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo">🍔</div>
+    <div><h1>BIG<span>BURGER</span> Disparo</h1><small>WHATSAPP</small></div>
+  </div>
+  <div class="right">
+    <span class="pill">Envio responsável</span>
+    <button class="btn-outline" onclick="baixarBackup()">⬇ Backup</button>
+  </div>
+</header>
+
+<main>
+  <section class="card">
+    <h2>👥 Contatos</h2>
+    <div class="warn">Use somente clientes que aceitaram receber mensagens. Contatos sem autorização ficam bloqueados para envio.</div>
+
+    <label>Nome</label>
+    <input id="nome" placeholder="Ex: Lucas">
+    <label>WhatsApp</label>
+    <input id="fone" placeholder="48999999999">
+    <label><input id="optin" type="checkbox" style="width:auto"> Cliente autorizou receber mensagens</label>
+    <button class="btn-green" onclick="adicionarContato()">+ Adicionar contato</button>
+
+    <h3>Importar lista</h3>
+    <textarea id="importar" placeholder="Um contato por linha:
+Lucas;48999999999;sim
+Maria;48988888888;sim"></textarea>
+    <div class="row">
+      <button class="btn-outline" onclick="importarContatos()">Importar</button>
+      <button class="btn-outline" onclick="limparContatos()">Limpar lista</button>
+    </div>
+
+    <h3>Lista</h3>
+    <div id="lista" class="contacts"></div>
+  </section>
+
+  <section class="card">
+    <div class="tabs">
+      <button class="tab active" onclick="aba('campanha',this)">📣 Campanha</button>
+      <button class="tab" onclick="aba('envio',this)">🚀 Envio</button>
+      <button class="tab" onclick="aba('config',this)">⚙️ Configuração</button>
+    </div>
+
+    <div class="grid3">
+      <div class="stat"><b id="totalContatos">0</b><span>Contatos</span></div>
+      <div class="stat"><b id="totalOptin">0</b><span>Autorizados</span></div>
+      <div class="stat"><b id="totalEnviado">0</b><span>Enviados nesta sessão</span></div>
+    </div>
+
+    <div id="campanha">
+      <h2>📣 Mensagem da campanha</h2>
+      <label>Título interno</label>
+      <input id="titulo" placeholder="Promoção de hoje">
+      <label>Mensagem</label>
+      <textarea id="msg">🍔 Big Burger
+
+Hoje tem promoção especial!
+
+Peça pelo nosso cardápio online:
+https://big-burger-delivery-rho.vercel.app
+
+Responder PARAR para não receber mais mensagens.</textarea>
+      <div class="row">
+        <button class="btn-yellow" onclick="salvarCampanha()">Salvar campanha</button>
+        <button class="btn-outline" onclick="modeloPromocao()">Modelo promoção</button>
+        <button class="btn-outline" onclick="modeloFechado()">Modelo horário</button>
+      </div>
+    </div>
+
+    <div id="envio" class="hidden">
+      <h2>🚀 Envio</h2>
+      <div class="warn">O envio é feito um por vez pelo navegador, com intervalo configurável. Não feche esta página durante o envio.</div>
+      <div class="grid2">
+        <div>
+          <label>Intervalo entre mensagens em segundos</label>
+          <input id="intervalo" type="number" min="10" value="20">
+        </div>
+        <div>
+          <label>Limite de mensagens nesta rodada</label>
+          <input id="limite" type="number" min="1" value="50">
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn-red" onclick="iniciarEnvio()">🚀 Iniciar envio</button>
+        <button class="btn-outline" onclick="pararEnvio()">⏸ Parar</button>
+        <button class="btn-outline" onclick="limparLog()">Limpar log</button>
+      </div>
+      <h3>Log</h3>
+      <div id="log" class="log"></div>
+    </div>
+
+    <div id="config" class="hidden">
+      <h2>⚙️ Configuração</h2>
+      <p style="color:#bbb;line-height:1.5">Para envio real, coloque as variáveis da Evolution API no Vercel em <b>Environment Variables</b>. Sem isso, o painel fica em modo teste.</p>
+      <div class="grid2">
+        <div class="stat"><b class="badge">EVOLUTION_API_URL</b><span>URL da sua Evolution API</span></div>
+        <div class="stat"><b class="badge">EVOLUTION_API_KEY</b><span>Chave da API</span></div>
+        <div class="stat"><b class="badge">EVOLUTION_INSTANCE</b><span>Nome da instância conectada</span></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+let contatos = JSON.parse(localStorage.getItem('bb_contatos') || '[]');
+let enviados = 0;
+let parar = false;
+
+function salvar(){localStorage.setItem('bb_contatos', JSON.stringify(contatos)); render();}
+function render(){
+  document.getElementById('totalContatos').textContent = contatos.length;
+  document.getElementById('totalOptin').textContent = contatos.filter(c=>c.optin).length;
+  document.getElementById('totalEnviado').textContent = enviados;
+  const lista = document.getElementById('lista');
+  if(!contatos.length){lista.innerHTML='<div class="contact"><div>📭</div><div>Nenhum contato cadastrado</div></div>';return;}
+  lista.innerHTML = contatos.map((c,i)=>`
+    <div class="contact">
+      <input type="checkbox" ${c.selecionado!==false?'checked':''} onchange="contatos[${i}].selecionado=this.checked;salvar()">
+      <div><b>${esc(c.nome)}</b><small>${esc(c.fone)} • ${c.optin?'autorizado':'sem autorização'}</small></div>
+      <button onclick="removerContato(${i})">🗑</button>
+    </div>`).join('');
+}
+function esc(s){return String(s||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function adicionarContato(){
+  const nome=document.getElementById('nome').value.trim();
+  const fone=document.getElementById('fone').value.replace(/\D/g,'');
+  const optin=document.getElementById('optin').checked;
+  if(!nome || fone.length<10) return alert('Preencha nome e WhatsApp correto.');
+  contatos.push({nome,fone,optin,selecionado:true});
+  document.getElementById('nome').value='';document.getElementById('fone').value='';document.getElementById('optin').checked=false;
+  salvar();
+}
+function removerContato(i){contatos.splice(i,1);salvar();}
+function limparContatos(){if(confirm('Limpar todos os contatos?')){contatos=[];salvar();}}
+function importarContatos(){
+  const linhas=document.getElementById('importar').value.split(/\n+/).map(l=>l.trim()).filter(Boolean);
+  let add=0;
+  linhas.forEach(l=>{
+    const [nome,fone,opt] = l.split(/[;,]/).map(x=>String(x||'').trim());
+    const num=(fone||'').replace(/\D/g,'');
+    if(nome && num.length>=10){contatos.push({nome,fone:num,optin:/sim|s|yes|ok|autoriz/i.test(opt||''),selecionado:true});add++;}
+  });
+  document.getElementById('importar').value='';
+  salvar(); alert(add+' contato(s) importado(s).');
+}
+function aba(id,btn){
+  ['campanha','envio','config'].forEach(x=>document.getElementById(x).classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
+}
+function salvarCampanha(){localStorage.setItem('bb_titulo',titulo.value);localStorage.setItem('bb_msg',msg.value);alert('Campanha salva.');}
+function carregarCampanha(){titulo.value=localStorage.getItem('bb_titulo')||''; const m=localStorage.getItem('bb_msg'); if(m) msg.value=m;}
+function modeloPromocao(){msg.value='🍔 Big Burger\\n\\nPromoção especial por tempo limitado!\\n\\nPeça agora pelo cardápio online:\\nhttps://big-burger-delivery-rho.vercel.app\\n\\nResponder PARAR para não receber mais mensagens.'}
+function modeloFechado(){msg.value='🍔 Big Burger\\n\\nEstamos fechados no momento.\\nNosso atendimento retorna no próximo horário de funcionamento.\\n\\nVeja o cardápio:\\nhttps://big-burger-delivery-rho.vercel.app\\n\\nResponder PARAR para não receber mais mensagens.'}
+function log(t){const el=document.getElementById('log'); el.textContent += '['+new Date().toLocaleTimeString()+'] '+t+'\\n'; el.scrollTop=el.scrollHeight;}
+function limparLog(){document.getElementById('log').textContent='';}
+function esperar(ms){return new Promise(r=>setTimeout(r,ms));}
+async function iniciarEnvio(){
+  parar=false; salvarCampanha();
+  const mensagem=document.getElementById('msg').value.trim();
+  const intervalo=Math.max(10, Number(document.getElementById('intervalo').value||20))*1000;
+  const limite=Math.max(1, Number(document.getElementById('limite').value||50));
+  const fila=contatos.filter(c=>c.selecionado!==false && c.optin).slice(0,limite);
+  if(!mensagem) return alert('Digite a mensagem.');
+  if(!fila.length) return alert('Nenhum contato autorizado selecionado.');
+  log('Iniciando envio para '+fila.length+' contato(s).');
+  for(const c of fila){
+    if(parar){log('Envio pausado.');break;}
+    try{
+      const r=await fetch('/api/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:c.fone,message:mensagem,optIn:c.optin})});
+      const d=await r.json().catch(()=>({}));
+      if(!r.ok || d.ok===false) throw new Error(d.error||'Erro no envio');
+      enviados++; render();
+      log('✅ '+c.nome+' - '+(d.simulated?'modo teste':'enviado'));
+    }catch(e){log('❌ '+c.nome+' - '+e.message);}
+    await esperar(intervalo);
+  }
+  log('Finalizado.');
+}
+function pararEnvio(){parar=true;log('Solicitado parar envio.');}
+function baixarBackup(){
+  const blob=new Blob([JSON.stringify({contatos, campanha:{titulo:titulo.value,msg:msg.value}},null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='backup-bigburger-disparo.json'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),500);
+}
+carregarCampanha(); render();
+</script>
+</body>
+</html>
