@@ -22,9 +22,9 @@ export default async function handler(req, res) {
       return res.status(400).json({ ok:false, error:'Mensagem vazia.' });
     }
 
-    const baseUrl = process.env.EVOLUTION_API_URL;
-    const apiKey = process.env.EVOLUTION_API_KEY;
-    const instance = process.env.EVOLUTION_INSTANCE;
+    const baseUrl = process.env.EVOLUTION_API_URL || 'https://corocre-trailside-outbound.ngrok-free.dev';
+    const apiKey = process.env.EVOLUTION_API_KEY || '5736B9A6D254-44C4-8FC3-6A9EC7CF4428';
+    const instance = process.env.EVOLUTION_INSTANCE || 'bidisparo';
 
     if (!baseUrl || !apiKey || !instance) {
       return res.status(200).json({
