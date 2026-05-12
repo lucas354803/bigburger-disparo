@@ -18,6 +18,9 @@
     label{display:block;margin:12px 0 7px;font-weight:700;color:#ddd;font-size:13px}
     input,textarea,select{width:100%;border:1px solid #303030;background:#0b0b0b;color:#fff;border-radius:12px;padding:12px;font-size:14px;outline:none}
     textarea{min-height:160px;resize:vertical;line-height:1.4}
+    .preview{margin-top:10px;border:1px dashed #444;border-radius:14px;padding:10px;background:#090909;display:none}
+    .preview img{max-width:220px;max-height:220px;border-radius:12px;display:block;margin-bottom:8px}
+    .help{color:#a1a1aa;font-size:12px;line-height:1.4;margin-top:6px}
     input:focus,textarea:focus,select:focus{border-color:var(--red)}
     button{border:0;border-radius:12px;padding:12px 14px;font-weight:900;cursor:pointer;color:#fff;background:#252525}
     .btn-red{background:linear-gradient(180deg,#ef4444,#b91c1c)}.btn-yellow{background:linear-gradient(180deg,#facc15,#eab308);color:#111}.btn-green{background:linear-gradient(180deg,#22c55e,#15803d)}.btn-outline{background:#111;border:1px solid #444}
@@ -86,7 +89,15 @@ Maria;48988888888;sim"></textarea>
       <h2>📣 Mensagem da campanha</h2>
       <label>Título interno</label>
       <input id="titulo" placeholder="Promoção de hoje">
-      <label>Mensagem</label>
+      <label>Foto da campanha</label>
+      <input id="foto" type="file" accept="image/png,image/jpeg,image/webp" onchange="previewFoto()">
+      <div class="help">Opcional. Use imagem JPG, PNG ou WEBP. Recomendado: até 2 MB para não travar no envio.</div>
+      <div id="previewBox" class="preview">
+        <img id="previewImg" alt="Prévia da foto">
+        <button class="btn-outline" onclick="removerFoto()" type="button">Remover foto</button>
+      </div>
+
+      <label>Texto embaixo da foto / legenda</label>
       <textarea id="msg">🍔 Big Burger
 
 Hoje tem promoção especial!
@@ -183,6 +194,29 @@ function aba(id,btn){
   document.getElementById(id).classList.remove('hidden');
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
 }
+function previewFoto(){
+  const file=document.getElementById('foto').files[0];
+  const box=document.getElementById('previewBox');
+  const img=document.getElementById('previewImg');
+  if(!file){box.style.display='none';img.src='';return;}
+  if(file.size > 4*1024*1024){alert('Imagem muito grande. Use uma imagem de até 4 MB.'); removerFoto(); return;}
+  img.src=URL.createObjectURL(file);
+  box.style.display='block';
+}
+function removerFoto(){
+  document.getElementById('foto').value='';
+  document.getElementById('previewImg').src='';
+  document.getElementById('previewBox').style.display='none';
+}
+function arquivoParaBase64(file){
+  return new Promise((resolve,reject)=>{
+    if(!file) return resolve(null);
+    const reader=new FileReader();
+    reader.onload=()=>resolve(String(reader.result||''));
+    reader.onerror=()=>reject(new Error('Não consegui ler a imagem.'));
+    reader.readAsDataURL(file);
+  });
+}
 function salvarCampanha(){localStorage.setItem('bb_titulo',titulo.value);localStorage.setItem('bb_msg',msg.value);alert('Campanha salva.');}
 function carregarCampanha(){titulo.value=localStorage.getItem('bb_titulo')||''; const m=localStorage.getItem('bb_msg'); if(m) msg.value=m;}
 function modeloPromocao(){msg.value='🍔 Big Burger\\n\\nPromoção especial por tempo limitado!\\n\\nPeça agora pelo cardápio online:\\nhttps://big-burger-delivery-rho.vercel.app\\n\\nResponder PARAR para não receber mais mensagens.'}
@@ -193,20 +227,22 @@ function esperar(ms){return new Promise(r=>setTimeout(r,ms));}
 async function iniciarEnvio(){
   parar=false; salvarCampanha();
   const mensagem=document.getElementById('msg').value.trim();
+  const fotoFile=document.getElementById('foto').files[0] || null;
+  const fotoBase64=await arquivoParaBase64(fotoFile);
   const intervalo=Math.max(10, Number(document.getElementById('intervalo').value||20))*1000;
   const limite=Math.max(1, Number(document.getElementById('limite').value||50));
   const fila=contatos.filter(c=>c.selecionado!==false && c.optin).slice(0,limite);
-  if(!mensagem) return alert('Digite a mensagem.');
+  if(!mensagem && !fotoFile) return alert('Digite a mensagem ou escolha uma foto.');
   if(!fila.length) return alert('Nenhum contato autorizado selecionado.');
   log('Iniciando envio para '+fila.length+' contato(s).');
   for(const c of fila){
     if(parar){log('Envio pausado.');break;}
     try{
-      const r=await fetch('/api/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:c.fone,message:mensagem,optIn:c.optin})});
+      const r=await fetch('/api/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:c.fone,message:mensagem,optIn:c.optin,media:fotoBase64,mimeType:fotoFile?fotoFile.type:null,fileName:fotoFile?fotoFile.name:null})});
       const d=await r.json().catch(()=>({}));
       if(!r.ok || d.ok===false) throw new Error(d.error||'Erro no envio');
       enviados++; render();
-      log('✅ '+c.nome+' - '+(d.simulated?'modo teste':'enviado'));
+      log('✅ '+c.nome+' - '+(fotoFile?'foto + texto enviado':'texto enviado')); 
     }catch(e){log('❌ '+c.nome+' - '+e.message);}
     await esperar(intervalo);
   }

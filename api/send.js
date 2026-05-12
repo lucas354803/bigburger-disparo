@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ ok:false, error:'Use POST' });
 
   try {
-    const { phone, message, optIn } = req.body || {};
+    const { phone, message, optIn, media, mimeType, fileName } = req.body || {};
 
     if (!optIn) {
       return res.status(400).json({ ok:false, error:'Envio bloqueado: contato sem autorização/opt-in.' });
@@ -18,17 +18,36 @@ export default async function handler(req, res) {
       return res.status(400).json({ ok:false, error:'Telefone inválido.' });
     }
 
-    if (!message || String(message).trim().length < 2) {
-      return res.status(400).json({ ok:false, error:'Mensagem vazia.' });
+    const text = String(message || '').trim();
+    const hasMedia = Boolean(media && String(media).startsWith('data:image/'));
+
+    if (!text && !hasMedia) {
+      return res.status(400).json({ ok:false, error:'Mensagem vazia e sem imagem.' });
     }
 
-    // Usa as variáveis do Vercel. Se não existirem, usa sua configuração atual.
-    const baseUrl = (process.env.EVOLUTION_API_URL || 'https://corocre-trailside-outbound.ngrok-free.dev').replace(/\/$/, '');
+    const baseUrl = (process.env.EVOLUTION_API_URL || 'https://coerce-trailside-outbound.ngrok-free.dev').replace(/\/$/, '');
     const apiKey = process.env.EVOLUTION_API_KEY || '5736B9A6D254-44C4-8FC3-6A9EC7CF4428';
     const instance = process.env.EVOLUTION_INSTANCE || 'bidisparo';
-
     const number = only.startsWith('55') ? only : `55${only}`;
-    const url = `${baseUrl}/message/sendText/${encodeURIComponent(instance)}`;
+
+    let endpoint = '/message/sendText/';
+    let payload = { number, text };
+
+    if (hasMedia) {
+      endpoint = '/message/sendMedia/';
+      const cleanBase64 = String(media).replace(/^data:[^;]+;base64,/, '');
+      const safeMime = mimeType || 'image/jpeg';
+      payload = {
+        number,
+        mediatype: 'image',
+        mimetype: safeMime,
+        caption: text,
+        media: cleanBase64,
+        fileName: fileName || `big-burger-${Date.now()}.jpg`
+      };
+    }
+
+    const url = `${baseUrl}${endpoint}${encodeURIComponent(instance)}`;
 
     const response = await fetch(url, {
       method:'POST',
@@ -37,10 +56,7 @@ export default async function handler(req, res) {
         'apikey': apiKey,
         'ngrok-skip-browser-warning': 'true'
       },
-      body: JSON.stringify({
-        number,
-        text: String(message)
-      })
+      body: JSON.stringify(payload)
     });
 
     const raw = await response.text();
@@ -58,12 +74,12 @@ export default async function handler(req, res) {
       });
     }
 
-    return res.status(200).json({ ok:true, data, instance, number });
+    return res.status(200).json({ ok:true, data, instance, number, type: hasMedia ? 'image' : 'text' });
   } catch (e) {
     return res.status(200).json({
       ok:false,
       error:e.message || 'Erro interno',
-      hint:'Confira se o ngrok está aberto e se a URL do Vercel é a URL atual do ngrok.'
+      hint:'Confira se o ngrok está aberto e se a URL/API KEY/instância do Vercel estão corretas.'
     });
   }
 }
