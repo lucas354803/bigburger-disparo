@@ -22,26 +22,20 @@ export default async function handler(req, res) {
       return res.status(400).json({ ok:false, error:'Mensagem vazia.' });
     }
 
-    const baseUrl = process.env.EVOLUTION_API_URL || 'https://corocre-trailside-outbound.ngrok-free.dev';
+    // Usa as variáveis do Vercel. Se não existirem, usa sua configuração atual.
+    const baseUrl = (process.env.EVOLUTION_API_URL || 'https://corocre-trailside-outbound.ngrok-free.dev').replace(/\/$/, '');
     const apiKey = process.env.EVOLUTION_API_KEY || '5736B9A6D254-44C4-8FC3-6A9EC7CF4428';
     const instance = process.env.EVOLUTION_INSTANCE || 'bidisparo';
 
-    if (!baseUrl || !apiKey || !instance) {
-      return res.status(200).json({
-        ok:true,
-        simulated:true,
-        message:'Modo teste: variáveis da Evolution API não configuradas no Vercel.'
-      });
-    }
-
     const number = only.startsWith('55') ? only : `55${only}`;
-    const url = `${baseUrl.replace(/\/$/,'')}/message/sendText/${encodeURIComponent(instance)}`;
+    const url = `${baseUrl}/message/sendText/${encodeURIComponent(instance)}`;
 
     const response = await fetch(url, {
       method:'POST',
       headers:{
         'Content-Type':'application/json',
-        'apikey': apiKey
+        'apikey': apiKey,
+        'ngrok-skip-browser-warning': 'true'
       },
       body: JSON.stringify({
         number,
@@ -49,18 +43,27 @@ export default async function handler(req, res) {
       })
     });
 
-    const data = await response.json().catch(() => ({}));
+    const raw = await response.text();
+    let data = {};
+    try { data = raw ? JSON.parse(raw) : {}; } catch { data = { raw }; }
 
     if (!response.ok) {
-      return res.status(response.status).json({
+      return res.status(200).json({
         ok:false,
-        error:'Falha na Evolution API',
+        error:`Falha na Evolution API: HTTP ${response.status}`,
+        url,
+        instance,
+        number,
         details:data
       });
     }
 
-    return res.status(200).json({ ok:true, data });
+    return res.status(200).json({ ok:true, data, instance, number });
   } catch (e) {
-    return res.status(500).json({ ok:false, error:e.message || 'Erro interno' });
+    return res.status(200).json({
+      ok:false,
+      error:e.message || 'Erro interno',
+      hint:'Confira se o ngrok está aberto e se a URL do Vercel é a URL atual do ngrok.'
+    });
   }
 }

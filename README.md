@@ -1,25 +1,24 @@
-# BigBurger Disparo - configurado
+# BigBurger Disparo
 
-Painel web para gerenciar contatos autorizados e enviar mensagens pelo WhatsApp via Evolution API.
+Painel web simples para gerenciar contatos autorizados e enviar mensagens pelo WhatsApp via Evolution API.
 
-## Configuração aplicada neste ZIP
+## Como subir no GitHub/Vercel
 
-- EVOLUTION_API_URL: `https://corocre-trailside-outbound.ngrok-free.dev`
-- EVOLUTION_API_KEY: configurada conforme print
-- EVOLUTION_INSTANCE: `bidisparo`
+1. Envie todos os arquivos deste ZIP para a raiz do repositório.
+2. No Vercel, importe o repositório.
+3. Framework: `Other`.
+4. Não precisa build command.
+5. Abra o link do Vercel.
 
-## Importante
+## Envio real com Evolution API
 
-O CMD do ngrok precisa ficar aberto. Se fechar o ngrok, o envio para.
+No Vercel, vá em **Environment Variables** e cadastre:
 
-Se você abrir o ngrok de novo e ele gerar outro link, atualize a variável `EVOLUTION_API_URL` no Vercel ou no arquivo `api/send.js`.
+- `EVOLUTION_API_URL`
+- `EVOLUTION_API_KEY`
+- `EVOLUTION_INSTANCE`
 
-## Como subir no Vercel
-
-1. Apague os arquivos antigos do projeto no GitHub/Vercel.
-2. Envie os arquivos deste ZIP.
-3. Faça redeploy no Vercel.
-4. Abra o painel e teste com seu próprio número primeiro.
+Sem essas variáveis, o painel abre em modo teste.
 
 ## Uso responsável
 
